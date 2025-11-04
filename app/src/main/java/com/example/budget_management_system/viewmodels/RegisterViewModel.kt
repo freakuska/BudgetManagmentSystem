@@ -3,8 +3,8 @@ package com.example.budget_management_system.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.budget_management_system.ApiService
-import com.example.budget_management_system.models.AuthResponseDto
-import com.example.budget_management_system.models.RegisterRequestDto
+import com.example.budget_management_system.models.dto.AuthResponseDto
+import com.example.budget_management_system.models.dto.RegisterRequestDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

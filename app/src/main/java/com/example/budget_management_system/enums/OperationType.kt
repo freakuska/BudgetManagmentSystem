@@ -1,4 +1,7 @@
 package com.example.budget_management_system.enums
 
-class OperationType {
+enum class OperationType {
+    Income,    // Доход
+    Expense,   // Расход
+    Transfer   // Перевод
 }

@@ -14,6 +14,7 @@ import com.example.budget_management_system.models.api.RetrofitClient
 import com.example.budget_management_system.repositories.AuthRepository
 import com.example.budget_management_system.utils.TokenManager
 import com.example.budget_management_system.viewmodels.AuthViewModel
+import com.financeapp.R
 import kotlinx.coroutines.launch
 
 class RegisterActivity : AppCompatActivity() {

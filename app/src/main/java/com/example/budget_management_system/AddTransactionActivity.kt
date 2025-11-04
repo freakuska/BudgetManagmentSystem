@@ -10,6 +10,7 @@ import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.financeapp.R
 
 class AddTransactionActivity : BaseActivity() {
 

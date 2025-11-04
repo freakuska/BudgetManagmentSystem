@@ -2,74 +2,141 @@ package com.example.budget_management_system.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.budget_management_system.models.database.OperationEntity
-import com.example.budget_management_system.models.dto.FinancialOperationDto
+import com.example.budget_management_system.models.dto.OperationResponse
+import com.example.budget_management_system.models.dto.OperationStats
 import com.example.budget_management_system.repositories.OperationRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
 
-class OperationViewModel(private val repository: OperationRepository) : ViewModel() {
-    private val _operations = MutableStateFlow<List<OperationEntity>>(emptyList())
-    val operations: StateFlow<List<OperationEntity>> = _operations.asStateFlow()
+data class OperationUiState(
+    val operations: List<OperationResponse> = emptyList(),
+    val stats: OperationStats? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val selectedOperation: OperationResponse? = null
+)
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+class OperationViewModel(private val operationRepository: OperationRepository) : ViewModel() {
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    private val _uiState = MutableStateFlow(OperationUiState())
+    val uiState = _uiState.asStateFlow()
 
-    init {
-        loadOperations()
+    fun loadOperations(skip: Int = 0, take: Int = 50) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = operationRepository.getOperations(skip, take)
+            result.onSuccess { operations ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    operations = operations
+                )
+            }
+            result.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Failed to load operations"
+                )
+            }
+        }
     }
 
-    fun loadOperations() {
+    fun loadStats() {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                repository.fetchOperationsFromServer()
-                repository.getAllOperations().collect { ops ->
-                    _operations.value = ops
+            val result = operationRepository.getStats()
+            result.onSuccess { stats ->
+                _uiState.value = _uiState.value.copy(stats = stats)
+            }
+            result.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    error = error.message ?: "Failed to load stats"
+                )
+            }
+        }
+    }
+
+    fun createOperation(
+        amount: Double,
+        description: String,
+        type: String,
+        tagId: String,
+        date: String
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = operationRepository.createOperation(amount, description, type, tagId, date)
+            result.onSuccess { operation ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    operations = listOf(operation) + _uiState.value.operations
+                )
+                loadStats()
+            }
+            result.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Failed to create operation"
+                )
+            }
+        }
+    }
+
+    fun updateOperation(
+        id: String,
+        amount: Double,
+        description: String,
+        type: String,
+        tagId: String,
+        date: String
+    ) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+
+            val result = operationRepository.updateOperation(id, amount, description, type, tagId, date)
+            result.onSuccess { operation ->
+                val updatedList = _uiState.value.operations.map {
+                    if (it.id == id) operation else it
                 }
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    operations = updatedList
+                )
+                loadStats()
+            }
+            result.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Failed to update operation"
+                )
             }
         }
     }
 
-    fun createOperation(operation: FinancialOperationDto) {
+    fun deleteOperation(id: String) {
         viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                repository.createOperation(operation)
-                loadOperations()
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-    fun deleteOperation(id: UUID) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            try {
-                repository.deleteOperation(id)
-                loadOperations()
-            } catch (e: Exception) {
-                _errorMessage.value = e.message
-            } finally {
-                _isLoading.value = false
+            val result = operationRepository.deleteOperation(id)
+            result.onSuccess {
+                val updatedList = _uiState.value.operations.filter { it.id != id }
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    operations = updatedList
+                )
+                loadStats()
+            }
+            result.onFailure { error ->
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = error.message ?: "Failed to delete operation"
+                )
             }
         }
     }
 
     fun clearError() {
-        _errorMessage.value = null
+        _uiState.value = _uiState.value.copy(error = null)
     }
 }

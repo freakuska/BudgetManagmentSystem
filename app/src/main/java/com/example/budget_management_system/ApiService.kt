@@ -2,28 +2,28 @@ package com.example.budget_management_system
 
 import retrofit2.Call
 import retrofit2.http.*
-import com.example.budget_management_system.models.LoginRequestDto
-import com.example.budget_management_system.models.AuthResponseDto
-import com.example.budget_management_system.models.RegisterRequestDto
+import com.example.budget_management_system.models.dto.LoginRequestDto
+import com.example.budget_management_system.models.AuthResponse
+import com.example.budget_management_system.models.dto.RegisterRequestDto
 import com.example.budget_management_system.models.User
 import com.example.budget_management_system.models.FinancialOperation
-import com.example.budget_management_system.models.CreateOperationDto
-import com.example.budget_management_system.models.UpdateOperationDto
+import com.example.budget_management_system.models.dto.CreateOperationDto
+import com.example.budget_management_system.models.dto.UpdateOperationDto
 import com.example.budget_management_system.models.Tag
-import com.example.budget_management_system.models.CreateTagDto
-import com.example.budget_management_system.models.UpdateTagDto
+import com.example.budget_management_system.models.dto.CreateTagDto
+import com.example.budget_management_system.models.dto.UpdateTagDto
 
 interface ApiService {
 
     // Аутентификация
     @POST("/api/auth/login")
-    suspend fun login(@Body request: LoginRequestDto): AuthResponseDto
+    suspend fun login(@Body request: LoginRequestDto): AuthResponse
 
     @POST("/api/auth/register")
-    suspend fun register(@Body request: RegisterRequestDto): AuthResponseDto
+    suspend fun register(@Body request: RegisterRequestDto): AuthResponse
 
     @POST("/api/auth/refresh")
-    suspend fun refresh(): AuthResponseDto
+    suspend fun refresh(): AuthResponse
 
     @POST("/api/auth/logout")
     suspend fun logout()

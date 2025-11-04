@@ -1,70 +1,75 @@
 package com.example.budget_management_system.repositories
 
 import com.example.budget_management_system.models.api.ApiService
-import com.example.budget_management_system.models.database.TagDao
-import com.example.budget_management_system.models.database.TagEntity
 import com.example.budget_management_system.models.dto.TagDto
-import kotlinx.coroutines.flow.Flow
-import java.util.*
+import com.example.budget_management_system.models.dto.TagRequest
+import com.example.budget_management_system.models.dto.TagResponse
+import retrofit2.Response
 
-class TagRepository(
-    private val apiService: ApiService,
-    private val tagDao: TagDao
-) {
-    fun getAllTags(): Flow<List<TagEntity>> {
-        return tagDao.getAllTags()
-    }
+class TagRepository(private val apiService: ApiService) {
 
-    suspend fun getTagById(id: UUID): TagEntity? {
-        return tagDao.getTagById(id)
-    }
-
-    suspend fun fetchTagsFromServer() {
-        try {
+    suspend fun getTags(): Result<List<TagResponse>> {
+        return try {
             val response = apiService.getTags()
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!.forEach { dto ->
-                    val entity = TagEntity(
-                        id = dto.id,
-                        name = dto.name,
-                        type = dto.type,
-                        color = dto.color,
-                        usageCount = dto.usageCount
-                    )
-                    tagDao.insertTag(entity)
-                }
-            }
+            Result.success(response)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Result.failure(e)
         }
     }
 
-    suspend fun createTag(tag: TagDto) {
-        try {
-            val response = apiService.createTag(tag)
-            if (response.isSuccessful && response.body() != null) {
-                val entity = TagEntity(
-                    id = response.body()!!.id,
-                    name = response.body()!!.name,
-                    type = response.body()!!.type,
-                    color = response.body()!!.color,
-                    usageCount = response.body()!!.usageCount
-                )
-                tagDao.insertTag(entity)
-            }
+    suspend fun getTagsTree(): Result<Response<List<TagDto>>> {
+        return try {
+            val response = apiService.getTagsTree()
+            Result.success(response)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Result.failure(e)
         }
     }
 
-    suspend fun deleteTag(id: UUID) {
-        try {
-            val response = apiService.deleteTag(id)
-            if (response.isSuccessful) {
-                tagDao.deleteTagById(id)
-            }
+    suspend fun getTag(id: String): Result<Response<TagDto>> {
+        return try {
+            val response = apiService.getTag(id)
+            Result.success(response)
         } catch (e: Exception) {
-            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun createTag(name: String, type: String, color: String? = null, icon: String? = null): Result<Response<TagDto>> {
+        return try {
+            val request = TagRequest(name, type, color, icon)
+            val response = apiService.createTag(request)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateTag(id: String, name: String, type: String, color: String? = null, icon: String? = null): Result<Response<TagDto>> {
+        return try {
+            val request = TagRequest(name, type, color, icon)
+            val response = apiService.updateTag(id, request)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun deleteTag(id: String): Result<Unit> {
+        return try {
+            apiService.deleteTag(id)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun searchTags(query: String): Result<Response<List<TagDto>>> {
+        return try {
+            val response = apiService.searchTags(query)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

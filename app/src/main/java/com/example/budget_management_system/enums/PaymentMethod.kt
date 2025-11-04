@@ -1,4 +1,8 @@
 package com.example.budget_management_system.enums
 
-class PaymentMethod {
+enum class PaymentMethod {
+    Cash,      // Наличные
+    Card,      // Карта
+    Transfer,  // Перевод
+    Other      // Другое
 }
