@@ -10,27 +10,16 @@ class AuthRepository(
     private val apiService: ApiService,
     private val tokenManager: TokenManager
 ) {
-
-    suspend fun login(email: String, password: String): Result<String> {
-        return try {
-            val request = LoginRequestDto(email, password)
-            val response = apiService.login(request)
-
-            if (response.isSuccessful && response.body() != null) {
-                val authResponse = response.body()!!
-                tokenManager.saveTokens(
-                    authResponse.accessToken,
-                    authResponse.refreshToken,
-                    authResponse.expiresAt
-                )
-                tokenManager.saveUserData(authResponse.id, authResponse.email, authResponse.login)
-                Result.success("Login successful")
-            } else {
-                Result.failure(Exception("Login failed: ${response.message()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    suspend fun login(email: String, password: String): Result<String> = runCatching {
+        val response = apiService.login(LoginRequestDto(email, password))
+        val body = response.body()
+        if (!response.isSuccessful || body == null) {
+            throw IllegalStateException("Login failed: ${response.message()}")
         }
+
+        tokenManager.saveTokens(body.accessToken, body.refreshToken)
+        tokenManager.saveUserData(body.id.toString(), body.email)
+        "Login successful"
     }
 
     suspend fun register(
@@ -38,48 +27,29 @@ class AuthRepository(
         email: String,
         password: String,
         fullName: String? = null
-    ): Result<String> {
-        return try {
-            val request = RegisterRequestDto(login, email, password, fullName)
-            val response = apiService.register(request)
-
-            if (response.isSuccessful && response.body() != null) {
-                val authResponse = response.body()!!
-                tokenManager.saveTokens(
-                    authResponse.accessToken,
-                    authResponse.refreshToken,
-                    authResponse.expiresAt
-                )
-                tokenManager.saveUserData(authResponse.id, authResponse.email, authResponse.login)
-                Result.success("Registration successful")
-            } else {
-                Result.failure(Exception("Registration failed: ${response.message()}"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
+    ): Result<String> = runCatching {
+        val response = apiService.register(RegisterRequestDto(login, email, password, fullName))
+        val body = response.body()
+        if (!response.isSuccessful || body == null) {
+            throw IllegalStateException("Registration failed: ${response.message()}")
         }
+
+        tokenManager.saveTokens(body.accessToken, body.refreshToken)
+        tokenManager.saveUserData(body.id.toString(), body.email)
+        "Registration successful"
     }
 
-    suspend fun logout(): Result<String> {
-        return try {
-            apiService.logout()
-            tokenManager.clearTokens()
-            Result.success("Logout successful")
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun logout(): Result<String> = runCatching {
+        apiService.logout()
+        tokenManager.clearTokens()
+        "Logout successful"
     }
 
-    suspend fun getCurrentUser(): Result<String> {
-        return try {
-            val response = apiService.getCurrentUser()
-            if (response.isSuccessful) {
-                Result.success(response.body()?.email ?: "Unknown")
-            } else {
-                Result.failure(Exception("Failed to get user"))
-            }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun getCurrentUser(): Result<String> = runCatching {
+        val response = apiService.getCurrentUser()
+        if (!response.isSuccessful) throw IllegalStateException("Failed to get user")
+        response.body()?.email ?: "Unknown"
     }
+
+    fun getUserEmail(): Flow<String?> = tokenManager.getUserEmailFlow()
 }
