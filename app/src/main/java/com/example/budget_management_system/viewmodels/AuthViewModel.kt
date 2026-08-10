@@ -40,7 +40,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
                 return@launch
             }
             val login = email.substringBefore('@')
-            val result = authRepository.register(login, email, password)
+            val result = authRepository.register(login, email, password, confirmPassword)
             result.onSuccess { message ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
