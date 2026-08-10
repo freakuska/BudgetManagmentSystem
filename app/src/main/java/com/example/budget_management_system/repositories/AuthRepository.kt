@@ -26,9 +26,9 @@ class AuthRepository(
         login: String,
         email: String,
         password: String,
-        fullName: String? = null
+        confirmPassword: String
     ): Result<String> = runCatching {
-        val response = apiService.register(RegisterRequestDto(login, email, password, fullName))
+        val response = apiService.register(RegisterRequestDto(login, email, password, confirmPassword))
         val body = response.body()
         if (!response.isSuccessful || body == null) {
             throw IllegalStateException("Registration failed: ${response.message()}")
