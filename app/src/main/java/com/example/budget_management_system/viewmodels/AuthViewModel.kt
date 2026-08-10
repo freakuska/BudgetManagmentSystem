@@ -35,7 +35,12 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, error = null)
 
-            val result = authRepository.register(email, password, confirmPassword)
+            if (password != confirmPassword) {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = "Passwords do not match")
+                return@launch
+            }
+            val login = email.substringBefore('@')
+            val result = authRepository.register(login, email, password)
             result.onSuccess { message ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
