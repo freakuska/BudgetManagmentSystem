@@ -16,7 +16,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.budget_management_system.repositories.AuthRepository
 import com.example.budget_management_system.repositories.OperationRepository
 import com.example.budget_management_system.repositories.TagRepository
-import com.example.budget_management_system.models.security.TokenManager\nimport com.example.budget_management_system.models.api.RetrofitClient
+import com.example.budget_management_system.models.security.TokenManager
+import com.example.budget_management_system.models.api.RetrofitClient
 import com.example.budget_management_system.models.navigation.NavigationHost
 import com.example.budget_management_system.models.theme.FinanceAppTheme
 import com.example.budget_management_system.viewmodels.AuthViewModel
