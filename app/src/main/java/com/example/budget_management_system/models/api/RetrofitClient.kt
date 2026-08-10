@@ -1,7 +1,7 @@
 package com.example.budget_management_system.models.api
 
 import android.content.Context
-import com.example.budget_management_system.utils.TokenManager
+import com.example.budget_management_system.models.security.TokenManager\nimport com.financeapp.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -16,7 +16,7 @@ object RetrofitClient {
         val tokenManager = TokenManager(context)
 
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC\n                    else HttpLoggingInterceptor.Level.NONE
         }
 
         val authInterceptor = Interceptor { chain ->
@@ -43,7 +43,7 @@ object RetrofitClient {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.API_BASE_URL)
             .client(httpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
