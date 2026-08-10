@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.budget_management_system.viewmodels  .AuthViewModel
+import com.example.budget_management_system.viewmodels.AuthViewModel
 
 @Composable
 fun RegisterScreen(
