@@ -1,7 +1,8 @@
 package com.example.budget_management_system.models.api
 
 import android.content.Context
-import com.example.budget_management_system.models.security.TokenManager\nimport com.financeapp.BuildConfig
+import com.example.budget_management_system.models.security.TokenManager
+import com.financeapp.BuildConfig
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -10,13 +11,12 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "https://localhost:7051/"
-
     fun getInstance(context: Context): Retrofit {
         val tokenManager = TokenManager(context)
 
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC\n                    else HttpLoggingInterceptor.Level.NONE
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
+                    else HttpLoggingInterceptor.Level.NONE
         }
 
         val authInterceptor = Interceptor { chain ->
